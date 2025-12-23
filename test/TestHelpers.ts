@@ -1,10 +1,8 @@
-import { IToken, Parser, Grammars } from '../dist';
-
-declare var require, it;
+import { Parser, IToken } from '../src';
+import { it } from 'bun:test';
+import { inspect } from 'util';
 
 export const printBNF = (parser: Parser) => console.log(parser.emitSource());
-
-let inspect = require('util').inspect;
 
 export function testParseToken(parser: Parser, txt: string, target?: string, customTest?: (document: IToken) => void) {
   testParseTokenFailsafe(parser, txt, target, (doc: IToken) => {

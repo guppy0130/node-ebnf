@@ -1,3 +1,4 @@
-export { Parser, IToken, IRule } from './Parser';
+export { Parser } from './Parser';
+export type { IToken, IRule } from './Parser';
 export { TokenError } from './TokenError';
-export import Grammars = require('./Grammars');
+export * as Grammars from './Grammars';

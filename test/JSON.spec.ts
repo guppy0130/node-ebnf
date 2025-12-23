@@ -1,11 +1,8 @@
-declare var describe, it, require;
+import { Grammars, Parser } from '../src';
+import { testParseToken } from './TestHelpers';
+import { describe } from 'bun:test';
 
-import { Grammars, Parser, IToken } from '../dist';
-import { testParseToken, describeTree, printBNF } from './TestHelpers';
-
-let inspect = require('util').inspect;
-
-let grammar = `
+const grammar = `
 /* https://www.ietf.org/rfc/rfc4627.txt */
 value                ::= false | null | true | object | array | number | string
 BEGIN_ARRAY          ::= WS* #x5B WS*  /* [ left square bracket */
@@ -42,16 +39,16 @@ describe('JSON', () => {
   describe('Parse JSON', () => {
     let parser: Parser;
 
-    it('create parser', () => {
+    describe('create parser', () => {
       parser = new Parser(Grammars.W3C.RULES, {});
       testParseToken(parser, grammar);
     });
   });
 
-  describe('Grammars.W3C parses JSON grammar', function() {
-    let RULES = Grammars.W3C.getRules(grammar);
+  describe('Grammars.W3C parses JSON grammar', function () {
+    const RULES = Grammars.W3C.getRules(grammar);
 
-    let parser = new Parser(RULES, {debug: true});
+    const parser = new Parser(RULES, { debug: true });
 
     testParseToken(parser, JSON.stringify(true));
     testParseToken(parser, JSON.stringify(false));
@@ -75,7 +72,7 @@ describe('JSON', () => {
         a: false,
         b: `asd
       asd `,
-        list: [1, 2, 3, true]
+        list: [1, 2, 3, true],
       })
     );
 

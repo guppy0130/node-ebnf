@@ -1,11 +1,10 @@
-declare var describe, it, require;
+import { Grammars, Parser } from '../src';
+import { testParseToken } from './TestHelpers';
+import { describe } from 'bun:test';
+// import { inspect } from 'util';
+// import { printBNF } from './TestHelpers';
 
-import { Grammars, Parser, IToken } from '../dist';
-import { testParseToken, describeTree, printBNF } from './TestHelpers';
-
-let inspect = require('util').inspect;
-
-let grammar = `
+const grammar = `
 { ws=explicit }
 Expression ::= FunctionCall | Literal | Selector | Interpolation {ws=implicit}
 Literal ::= Boolean | Null | String | Number | Integer | Date | Regex {ws=implicit}
@@ -44,13 +43,13 @@ HEXDIG          ::= [a-fA-F0-9]
 ESCAPABLE       ::= #x22 | #x5C | #x2F | #x62 | #x66 | #x6E | #x72 | #x74 | #x75 HEXDIG HEXDIG HEXDIG HEXDIG
 CHAR            ::= !"$" UNESCAPED | ESCAPE ESCAPABLE
 UNESCAPED       ::= [#x20-#x21] | [#x23-#x5B] | [#x5D-#xFFFF]
-  `;
+`;
 
 describe('ATL', () => {
   describe('Grammars.Custom parses ATL Expressions', function() {
-    let RULES = Grammars.Custom.getRules(grammar);
+    const RULES = Grammars.Custom.getRules(grammar);
     // console.log('JSON:\n' + inspect(RULES, false, 20, true));
-    let parser = new Parser(RULES, {});
+    const parser = new Parser(RULES, {});
 
     // printBNF(parser);
 

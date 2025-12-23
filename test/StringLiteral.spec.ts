@@ -1,13 +1,10 @@
-declare var describe, it, require;
-
-import { Grammars, Parser } from '../dist';
-import { findRuleByName } from '../dist/Parser';
+import { Grammars, Parser } from '../src';
+import { findRuleByName } from '../src/Parser';
 import { testParseToken, testParseTokenFailsafe } from './TestHelpers';
+import { describe, it, expect } from 'bun:test';
+import { inspect } from 'util';
 
-let inspect = require('util').inspect;
-let expect = require('expect');
-
-let grammar = `
+const grammar = `
 
 Document          ::= Keyword1 | Keyword2
 
@@ -20,19 +17,19 @@ describe('String Literals', () => {
   describe('Parse JSON', () => {
     let parser: Parser;
 
-    it('create parser', () => {
+    describe('create parser', () => {
       parser = new Parser(Grammars.Custom.RULES, {});
       testParseToken(parser, grammar);
     });
   });
 
   describe('Grammars.Custom parses JSON grammar', function() {
-    let RULES = Grammars.Custom.getRules(grammar);
+    const RULES = Grammars.Custom.getRules(grammar);
     console.log('JSON:\n' + inspect(RULES, false, 20, true));
-    let parser = new Parser(RULES, {});
+    const parser = new Parser(RULES, {});
 
     it('string literal case sensitive rule', () => {
-       let rule = findRuleByName("Keyword1", parser);
+       const rule = findRuleByName("Keyword1", parser);
 
        console.log(rule.bnf[0]);
 
@@ -54,7 +51,7 @@ describe('String Literals', () => {
     });
 
     it('string literal case insensitive rule', () => {
-       let rule = findRuleByName("Keyword2", parser);
+       const rule = findRuleByName("Keyword2", parser);
 
        console.log(rule.bnf[0]);
 

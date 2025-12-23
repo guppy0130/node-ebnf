@@ -1,12 +1,9 @@
-declare var describe, it, require;
+import { Grammars, Parser } from '../src';
+import { testParseToken, printBNF, testParseTokenFailsafe } from './TestHelpers';
+import { inspect } from 'util';
+import { describe, expect } from 'bun:test';
 
-import { Grammars, Parser, IToken } from '../dist';
-import { testParseToken, describeTree, printBNF, testParseTokenFailsafe } from './TestHelpers';
-
-let inspect = require('util').inspect;
-let expect = require('expect');
-
-let grammar = `
+const grammar = `
 
 
 {ws=explicit}
@@ -145,20 +142,20 @@ describe('New lang', () => {
   describe('Parse JSON', () => {
     let parser: Parser;
 
-    it('create parser', () => {
+    describe('create parser', () => {
       parser = new Parser(Grammars.Custom.RULES, {});
       testParseToken(parser, grammar);
     });
   });
 
-  describe('Grammars.Custom parses JSON grammar', function() {
-    let RULES = Grammars.Custom.getRules(grammar);
+  describe('Grammars.Custom parses JSON grammar', function () {
+    const RULES = Grammars.Custom.getRules(grammar);
     console.log('JSON:\n' + inspect(RULES, false, 20, true));
-    let parser = new Parser(RULES, {});
+    const parser = new Parser(RULES, {});
 
     printBNF(parser);
 
-    function test(literals, ...placeholders) {
+    function _test(literals, ...placeholders) {
       let result = '';
 
       // interleave the literals with the placeholders
@@ -172,65 +169,65 @@ describe('New lang', () => {
       testParseToken(parser, result);
     }
 
-    test`fun test() = 1`;
+    _test`fun test() = 1`;
 
-    test`fun test(  a: MBER,      b   : NumBer) = 1`;
+    _test`fun test(  a: MBER,      b   : NumBer) = 1`;
 
-    test`export fun test() = 2`;
+    _test`export fun test() = 2`;
 
-    test`var test: Double = 1`;
-    test`var test = 1`;
-    test`export var test = 1`;
+    _test`var test: Double = 1`;
+    _test`var test = 1`;
+    _test`export var test = 1`;
 
-    test`val test: Number = 1`;
-    test`val test = 1`;
+    _test`val test: Number = 1`;
+    _test`val test = 1`;
 
-    test`val test = 1 * 1 - 2 / 4 and 1 == 3 or 4 <= 4`;
+    _test`val test = 1 * 1 - 2 / 4 and 1 == 3 or 4 <= 4`;
 
-    test`val test = 1`;
+    _test`val test = 1`;
 
-    test`val test = 1 mul 4`;
+    _test`val test = 1 mul 4`;
 
-    test`val floatingNumber: Number = 1.0`;
-    test`val floatingNumber: Number = 0.0`;
+    _test`val floatingNumber: Number = 1.0`;
+    _test`val floatingNumber: Number = 0.0`;
 
-    test`export val test = 1`;
-    test`val test = true`;
-    test`val test = false`;
-    test`val test = null`;
+    _test`export val test = 1`;
+    _test`val test = true`;
+    _test`val test = false`;
+    _test`val test = null`;
 
-    test`fun test(): Number = 1`;
+    _test`fun test(): Number = 1`;
 
-    test`fun test(): Number = /*asd*/ 1`;
-    test`fun test(): Number = /**/ 1`;
+    _test`fun test(): Number = /*asd*/ 1`;
+    _test`fun test(): Number = /**/ 1`;
 
-    test`export fun test(a: Number) = 2`;
-    test`export fun test(a: Number, b: Type) = 2`;
+    _test`export fun test(a: Number) = 2`;
+    _test`export fun test(a: Number, b: Type) = 2`;
 
-    test`val test = 1 + (4 + 1)`;
-    test`val test = (1 + 4) + 1`;
+    _test`val test = 1 + (4 + 1)`;
+    _test`val test = (1 + 4) + 1`;
 
-    test`
+    _test`
       export var test = 1
       var test2 = 1
       val test2 = 1
     `;
 
-    test`
+    _test`
     var test = 1
     fun getTest() = test
     `;
 
-    test`var test = 1    fun pointerOfTest() = &test    `;
+    _test`var test = 1    fun pointerOfTest() = &test    `;
 
-    test`var test: Entity* = 1 fun valueOfTest() = *test`;
+    _test`var test: Entity* = 1 fun valueOfTest() = *test`;
 
-    test`var test: Struct* = 1`;
-    test`var test: Struct**** = 1`;
+    _test`var test: Struct* = 1`;
+    _test`var test: Struct**** = 1`;
 
-    test`var test: Struct[] = 1`;
-    test`var test: Struct*[] = 1`;
-    test`var test: Int64**[] = 1`;
+    _test`var test: Struct[] = 1`;
+    _test`var test: Struct*[] = 1`;
+    _test`var test: Int64**[] = 1`;
 
     // test`
     // export struct Entity {
@@ -242,32 +239,32 @@ describe('New lang', () => {
     // export fun getTest() = test
     // `;
 
-    test`val test = 1 match {}`;
-    test`val test = 1 match { else -> 1 }`;
-    test`
+    _test`val test = 1 match {}`;
+    _test`val test = 1 match { else -> 1 }`;
+    _test`
       val test = 1 match {
         case 2 -> true
         else -> false
       }
     `;
 
-    test`val test = 1 match { case 2 -> true else -> false }`;
+    _test`val test = 1 match { case 2 -> true else -> false }`;
 
-    test`
+    _test`
       val test = 1 match {
         case 2->true
         else->false
       }
     `;
 
-    test`
+    _test`
       val test = 1 match {
         case 2 -> true
         else -> false
       }
     `;
 
-    test`
+    _test`
       val test = 1 match {
         case x if true -> true
         case x if x < 1 and x < 10 -> true
@@ -276,77 +273,77 @@ describe('New lang', () => {
       }
     `;
 
-    test`val test = 1 match { case x if x < 1 and x < 10 -> true }`;
-    test`var a = x match { else -> 1 } map 1 * 2`;
+    _test`val test = 1 match { case x if x < 1 and x < 10 -> true }`;
+    _test`var a = x match { else -> 1 } map 1 * 2`;
 
-    test`var a = !x()`;
-    test`var a = x()`;
+    _test`var a = !x()`;
+    _test`var a = x()`;
 
-    testParseTokenFailsafe(parser, `export fun test(a: ) = 2`, null, doc => {
+    testParseTokenFailsafe(parser, `export fun test(a: ) = 2`, null, (doc) => {
       expect(doc.errors[0].token.type).toEqual('SyntaxError');
       expect(doc.errors[0].token.text).toEqual(') = 2');
     });
-    testParseTokenFailsafe(parser, `export struct Entity asd val x = 1`, null, doc => {
+    testParseTokenFailsafe(parser, `export struct Entity asd val x = 1`, null, (doc) => {
       expect(doc.errors[0].token.type).toEqual('SyntaxError');
       expect(doc.errors[0].token.text).toEqual('asd ');
     });
-    testParseTokenFailsafe(parser, `export struct Entity asd`, null, doc => {
+    testParseTokenFailsafe(parser, `export struct Entity asd`, null, (doc) => {
       expect(doc.errors[0].message).toEqual('Unexpected end of input: \nasd');
     });
-    testParseTokenFailsafe(parser, `struct Entity asd val x = 1`, null, doc => {
+    testParseTokenFailsafe(parser, `struct Entity asd val x = 1`, null, (doc) => {
       expect(doc.errors[0].token.type).toEqual('SyntaxError');
       expect(doc.errors[0].token.text).toEqual('asd ');
     });
-    testParseTokenFailsafe(parser, `struct Entity asd`, null, doc => {
+    testParseTokenFailsafe(parser, `struct Entity asd`, null, (doc) => {
       expect(doc.errors[0].message).toEqual('Unexpected end of input: \nasd');
     });
 
-    testParseTokenFailsafe(parser, `export fun test(a: ,b: AType) = 2`, null, doc => {
+    testParseTokenFailsafe(parser, `export fun test(a: ,b: AType) = 2`, null, (doc) => {
       expect(doc.errors[0].token.type).toEqual('SyntaxError');
       expect(doc.errors[0].token.text).toEqual(',b: AType) = 2');
     });
 
-    testParseTokenFailsafe(parser, `export fun test() = 2 /*`, null, doc => {
+    testParseTokenFailsafe(parser, `export fun test() = 2 /*`, null, (doc) => {
       expect(doc.errors[0].token.type).toEqual('SyntaxError');
       expect(doc.errors[0].token.text).toEqual('');
     });
 
-    testParseTokenFailsafe(parser, `export fun test(a: 1) = 2`, null, doc => {
+    testParseTokenFailsafe(parser, `export fun test(a: 1) = 2`, null, (doc) => {
       expect(doc.errors[0].token.type).toEqual('SyntaxError');
       expect(doc.errors[0].message).toEqual('Unexpected input: "1" Expecting: OfType');
       expect(doc.errors[0].token.text).toEqual('1');
     });
 
-    testParseTokenFailsafe(parser, 'export fun () = 1', null, doc => {
+    testParseTokenFailsafe(parser, 'export fun () = 1', null, (doc) => {
       expect(doc.errors[0].token.type).toEqual('SyntaxError');
       expect(doc.errors[0].token.text).toEqual('() = 1');
     });
 
-    testParseTokenFailsafe(parser, 'var a = .0', null, doc => {
+    testParseTokenFailsafe(parser, 'var a = .0', null, (doc) => {
       expect(doc.errors[0].token.type).toEqual('SyntaxError');
       expect(doc.errors[0].token.text).toEqual('.0');
     });
 
-    testParseTokenFailsafe(parser, 'var a = x match { else } map 1', null, doc => {
+    testParseTokenFailsafe(parser, 'var a = x match { else } map 1', null, (doc) => {
       expect(doc.errors[0].token.type).toEqual('SyntaxError');
       expect(doc.errors[0].token.text).toEqual('else } map 1');
     });
 
-    testParseTokenFailsafe(parser, 'var a = x match { else -> } map 1', null, doc => {
+    testParseTokenFailsafe(parser, 'var a = x match { else -> } map 1', null, (doc) => {
       expect(doc.errors[0].token.type).toEqual('SyntaxError');
       expect(doc.errors[0].token.text).toEqual('} map 1');
     });
 
-    testParseTokenFailsafe(parser, 'var a = match', null, doc => {
+    testParseTokenFailsafe(parser, 'var a = match', null, (doc) => {
       expect(doc.errors[0].token.type).toEqual('SyntaxError');
       expect(doc.errors[0].token.text).toEqual('match');
     });
 
-    test`val test = 1 map 1 map 2 map 3`;
-    test`val test = x(1)`;
-    test`val test = x(1,2)`;
-    test`val test = (x)(1,2)`;
-    test`val test = (x())(1,2)`;
-    test`val test = x( 1 , 2 /* sdgf */)`;
+    _test`val test = 1 map 1 map 2 map 3`;
+    _test`val test = x(1)`;
+    _test`val test = x(1,2)`;
+    _test`val test = (x)(1,2)`;
+    _test`val test = (x())(1,2)`;
+    _test`val test = x( 1 , 2 /* sdgf */)`;
   });
 });

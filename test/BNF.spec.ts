@@ -1,15 +1,9 @@
-declare var describe, it, require;
-
-import { Grammars, Parser, IToken } from '../dist';
-import { testParseToken, describeTree, printBNF } from './TestHelpers';
-
-let inspect = require('util').inspect;
-
-let lexer = Grammars.BNF.RULES;
-let parser = new Parser(Grammars.BNF.RULES, {});
+import { Grammars, Parser } from '../src';
+import { testParseToken, printBNF } from './TestHelpers';
+import { describe, it } from 'bun:test';
 
 describe('Parse BNF', () => {
-  let lisp = `
+  const lisp = `
     <lisp-document>  ::= <s_expression> <lisp-document> | <RULE_WHITESPACE> | <s_expression> <EOF> | <EOF>
     <s_expression>   ::= <atomic_symbol> | "(" <s_expression> "." <s_expression> ")" | <list>
     <list1>          ::= <RULE_WHITESPACE> <s_expression> <RULE_WHITESPACE> <list1> | <RULE_WHITESPACE> <s_expression>
@@ -37,7 +31,7 @@ describe('Parse BNF', () => {
 });
 
 describe('Parse custom calculator', () => {
-  let calc = `
+  const calc = `
     <Document>         ::= <Equation> <EOF>
     <Equation>         ::= <BinaryOperation> | <Term>
     <Term>             ::= "(" <RULE_WHITESPACE> <Equation> <RULE_WHITESPACE> ")" | "(" <RULE_WHITESPACE> <Number> <RULE_WHITESPACE> ")" | <RULE_WHITESPACE> <Number> <RULE_WHITESPACE>

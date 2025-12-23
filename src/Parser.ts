@@ -34,7 +34,7 @@ export interface IToken {
 }
 
 export function readToken(txt: string, expr: RegExp): IToken {
-  let result = expr.exec(txt);
+  const result = expr.exec(txt);
 
   if (result && result.index == 0) {
     if (result[0].length == 0 && expr.source.length > 0) return null;
@@ -47,41 +47,41 @@ export function readToken(txt: string, expr: RegExp): IToken {
       fullText: result[0],
       errors: [],
       children: [],
-      parent: null
+      parent: null,
     };
   }
 
   return null;
 }
 
-export function escapeRegExp(str) {
+export function escapeRegExp(str: string) {
+  /* eslint no-useless-escape: "off" -- TODO: unwind this */
   return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 }
 
 function fixRest(token: IToken) {
   token.rest = '';
-  token.children && token.children.forEach(c => fixRest(c));
+  token.children.forEach((c) => fixRest(c));
 }
 
 function fixPositions(token: IToken, start: number) {
   token.start += start;
   token.end += start;
-  token.children && token.children.forEach(c => fixPositions(c, token.start));
+  token.children.forEach((c) => fixPositions(c, token.start));
 }
 
-function agregateErrors(errors: any[], token: IToken) {
-  if (token.errors && token.errors.length) token.errors.forEach(err => errors.push(err));
-
-  token.children && token.children.forEach(tok => agregateErrors(errors, tok));
+function aggregateErrors(errors: TokenError[], token: IToken) {
+  if (token.errors && token.errors.length) token.errors.forEach((err) => errors.push(err));
+  token.children.forEach((tok) => aggregateErrors(errors, tok));
 }
 export function parseRuleName(name: string) {
-  let postDecoration = decorationRE.exec(name);
-  let preDecoration = preDecorationRE.exec(name);
+  const postDecoration = decorationRE.exec(name);
+  const preDecoration = preDecorationRE.exec(name);
 
-  let postDecorationText = (postDecoration && postDecoration[0]) || '';
-  let preDecorationText = (preDecoration && preDecoration[0]) || '';
+  const postDecorationText = (postDecoration && postDecoration[0]) || '';
+  const preDecorationText = (preDecoration && preDecoration[0]) || '';
 
-  let out = {
+  const out = {
     raw: name,
     name: name.replace(decorationRE, '').replace(preDecorationRE, ''),
     isOptional: postDecorationText == '?' || postDecorationText == '*',
@@ -91,7 +91,7 @@ export function parseRuleName(name: string) {
     lookupNegative: preDecorationText == '!',
     pinned: preDecorationText == '@',
     lookup: false,
-    isLiteral: false
+    isLiteral: false,
   };
 
   out.isLiteral = out.name[0] == "'" || out.name[0] == '"';
@@ -101,7 +101,7 @@ export function parseRuleName(name: string) {
 }
 
 export function findRuleByName(name: string, parser: Parser): IRule {
-  let parsed = parseRuleName(name);
+  const parsed = parseRuleName(name);
 
   return parser.cachedRules[parsed.name] || null;
 }
@@ -109,15 +109,15 @@ export function findRuleByName(name: string, parser: Parser): IRule {
 /// Removes all the nodes starting with 'RULE_'
 function stripRules(token: IToken, re: RegExp) {
   if (token.children) {
-    let localRules = token.children.filter(x => x.type && re.test(x.type));
+    const localRules = token.children.filter((x) => x.type && re.test(x.type));
     for (let i = 0; i < localRules.length; i++) {
-      let indexOnChildren = token.children.indexOf(localRules[i]);
+      const indexOnChildren = token.children.indexOf(localRules[i]);
       if (indexOnChildren != -1) {
         token.children.splice(indexOnChildren, 1);
       }
     }
 
-    token.children.forEach(c => stripRules(c, re));
+    token.children.forEach((c) => stripRules(c, re));
   }
 }
 
@@ -137,12 +137,12 @@ export class Parser {
   cachedRules: IDictionary<IRule> = {};
   constructor(public grammarRules: IRule[], public options?: Partial<IParserOptions>) {
     this.debug = options ? options.debug === true : false;
-    let errors = [];
+    const errors: string[] = [];
 
-    let neededRules: string[] = [];
+    const neededRules: string[] = [];
 
-    grammarRules.forEach(rule => {
-      let parsedName = parseRuleName(rule.name);
+    grammarRules.forEach((rule) => {
+      const parsedName = parseRuleName(rule.name);
 
       if (parsedName.name in this.cachedRules) {
         errors.push('Duplicated rule ' + parsedName.name);
@@ -152,23 +152,23 @@ export class Parser {
       }
 
       if (!rule.bnf || !rule.bnf.length) {
-        let error = 'Missing rule content, rule: ' + rule.name;
+        const error = 'Missing rule content, rule: ' + rule.name;
 
         if (errors.indexOf(error) == -1) errors.push(error);
       } else {
-        rule.bnf.forEach(options => {
+        rule.bnf.forEach((options) => {
           if (typeof options[0] === 'string') {
-            let parsed = parseRuleName(options[0] as string);
+            const parsed = parseRuleName(options[0] as string);
             if (parsed.name == rule.name) {
-              let error = 'Left recursion is not allowed, rule: ' + rule.name;
+              const error = 'Left recursion is not allowed, rule: ' + rule.name;
 
               if (errors.indexOf(error) == -1) errors.push(error);
             }
           }
 
-          options.forEach(option => {
+          options.forEach((option) => {
             if (typeof option == 'string') {
-              let name = parseRuleName(option);
+              const name = parseRuleName(option);
               if (
                 !name.isLiteral &&
                 neededRules.indexOf(name.name) == -1 &&
@@ -191,7 +191,7 @@ export class Parser {
       }
     });
 
-    neededRules.forEach(ruleName => {
+    neededRules.forEach((ruleName) => {
       if (!(ruleName in this.cachedRules)) {
         errors.push('Missing rule ' + ruleName);
       }
@@ -202,13 +202,13 @@ export class Parser {
 
   getAST(txt: string, target?: string) {
     if (!target) {
-      target = this.grammarRules.filter(x => !x.fragment && x.name.indexOf('%') != 0)[0].name;
+      target = this.grammarRules.filter((x) => !x.fragment && x.name.indexOf('%') != 0)[0].name;
     }
 
-    let result = this.parse(txt, target);
+    const result = this.parse(txt, target);
 
     if (result) {
-      agregateErrors(result.errors, result);
+      aggregateErrors(result.errors, result);
       fixPositions(result, 0);
 
       // REMOVE ALL THE TAGS MATCHING /^%/
@@ -216,7 +216,7 @@ export class Parser {
 
       if (!this.options || !this.options.keepUpperRules) stripRules(result, UPPER_SNAKE_RE);
 
-      let rest = result.rest;
+      const rest = result.rest;
 
       if (rest) {
         new TokenError('Unexpected end of input: \n' + rest, result);
@@ -237,20 +237,21 @@ export class Parser {
   parse(txt: string, target: string, recursion = 0): IToken {
     let out: IToken = null;
 
-    let type = parseRuleName(target);
+    const type = parseRuleName(target);
 
     let expr: RegExp;
 
-    let printable = this.debug && /*!isLiteral &*/ !UPPER_SNAKE_RE.test(type.name);
+    const printable = this.debug && /*!isLiteral &*/ !UPPER_SNAKE_RE.test(type.name);
 
-    printable &&
+    if (printable) {
       console.log(
         new Array(recursion).join('│  ') + 'Trying to get ' + target + ' from ' + JSON.stringify(txt.split('\n')[0])
       );
+    }
 
     let realType = type.name;
 
-    let targetLex = findRuleByName(type.name, this);
+    const targetLex = findRuleByName(type.name, this);
 
     if (type.name == 'EOF') {
       if (txt.length) {
@@ -265,15 +266,13 @@ export class Parser {
           fullText: '',
           errors: [],
           children: [],
-          parent: null
+          parent: null,
         };
       }
     }
 
     try {
       if (!targetLex && type.isLiteral) {
-        
-        
         let src: string = type.name.trim();
 
         if (src.startsWith('"')) {
@@ -292,7 +291,7 @@ export class Parser {
             fullText: '',
             errors: [],
             children: [],
-            parent: null
+            parent: null,
           };
         }
 
@@ -307,22 +306,22 @@ export class Parser {
     }
 
     if (expr) {
-      let result = readToken(txt, expr);
+      const result = readToken(txt, expr);
 
       if (result) {
         result.type = realType;
         return result;
       }
     } else {
-      let options = targetLex.bnf;
+      const options = targetLex.bnf;
 
       if (options instanceof Array) {
-        options.forEach(phases => {
+        options.forEach((phases) => {
           if (out) return;
 
           let pinned: IToken = null;
 
-          let tmp: IToken = {
+          const tmp: IToken = {
             type: type.name,
             text: '',
             children: [],
@@ -331,7 +330,7 @@ export class Parser {
             fullText: '',
             parent: null,
             start: 0,
-            rest: txt
+            rest: txt,
           };
 
           if (targetLex.fragment) tmp.fragment = true;
@@ -344,7 +343,7 @@ export class Parser {
 
           for (let i = 0; i < phases.length; i++) {
             if (typeof phases[i] == 'string') {
-              let localTarget = parseRuleName(phases[i] as string);
+              const localTarget = parseRuleName(phases[i] as string);
 
               allOptional = allOptional && localTarget.isOptional;
 
@@ -400,7 +399,9 @@ export class Parser {
 
                 if (got && targetLex.pinned == i + 1) {
                   pinned = got;
-                  printable && console.log(new Array(recursion + 1).join('│  ') + '└─ ' + got.type + ' PINNED');
+                  if (printable) {
+                    console.log(new Array(recursion + 1).join('│  ') + '└─ ' + got.type + ' PINNED');
+                  }
                 }
 
                 if (!got) got = this.parseRecovery(targetLex, tmpTxt, recursion + 1);
@@ -417,17 +418,18 @@ export class Parser {
                       fullText: '',
                       parent: null,
                       start: 0,
-                      rest: ''
+                      rest: '',
                     };
                     if (tmpTxt.length) {
                       new TokenError(`Unexpected end of input. Expecting ${localTarget.name} Got: ${tmpTxt}`, got);
                     } else {
                       new TokenError(`Unexpected end of input. Missing ${localTarget.name}`, got);
                     }
-                    printable &&
+                    if (printable) {
                       console.log(
                         new Array(recursion + 1).join('│  ') + '└─ ' + got.type + ' ' + JSON.stringify(got.text)
                       );
+                    }
                   } else {
                     return;
                   }
@@ -445,13 +447,12 @@ export class Parser {
 
                 if (!localTarget.lookupPositive && got.type) {
                   if (got.fragment) {
-                    got.children &&
-                      got.children.forEach(x => {
-                        x.start += position;
-                        x.end += position;
-                        x.parent = tmp;
-                        tmp.children.push(x);
-                      });
+                    got.children.forEach((x) => {
+                      x.start += position;
+                      x.end += position;
+                      x.parent = tmp;
+                      tmp.children.push(x);
+                    });
                   } else {
                     got.parent = tmp;
                     tmp.children.push(got);
@@ -460,8 +461,9 @@ export class Parser {
 
                 if (localTarget.lookup) got.lookup = true;
 
-                printable &&
+                if (printable) {
                   console.log(new Array(recursion + 1).join('│  ') + '└─ ' + got.type + ' ' + JSON.stringify(got.text));
+                }
 
                 // Eat it from the input stream, only if it is not a lookup
                 if (!localTarget.lookup && !got.lookup) {
@@ -475,16 +477,17 @@ export class Parser {
                 tmp.rest = tmpTxt;
               } while (got && localTarget.allowRepetition && tmpTxt.length && !got.lookup);
             } /* IS A REGEXP */ else {
-              let got = readToken(tmpTxt, phases[i] as RegExp);
+              const got = readToken(tmpTxt, phases[i] as RegExp);
 
               if (!got) {
                 return;
               }
 
-              printable &&
+              if (printable) {
                 console.log(
                   new Array(recursion + 1).join('│  ') + '└> ' + JSON.stringify(got.text) + (phases[i] as RegExp).source
                 );
+              }
 
               foundSomething = true;
 
@@ -504,10 +507,11 @@ export class Parser {
           if (foundSomething) {
             out = tmp;
 
-            printable &&
+            if (printable) {
               console.log(
                 new Array(recursion).join('│  ') + '├<─┴< PUSHING ' + out.type + ' ' + JSON.stringify(out.text)
               );
+            }
           }
         });
       }
@@ -517,8 +521,8 @@ export class Parser {
       }
     }
 
-    if (!out) {
-      printable && console.log(target + ' NOT RESOLVED FROM ' + txt);
+    if (!out && printable) {
+      console.log(target + ' NOT RESOLVED FROM ' + txt);
     }
 
     return out;
@@ -526,18 +530,19 @@ export class Parser {
 
   private parseRecovery(recoverableToken: IRule, tmpTxt: string, recursion: number): IToken {
     if (recoverableToken.recover && tmpTxt.length) {
-      let printable = this.debug;
+      const printable = this.debug;
 
-      printable &&
+      if (printable) {
         console.log(
           new Array(recursion + 1).join('│  ') +
-            'Trying to recover until token ' +
-            recoverableToken.recover +
-            ' from ' +
-            JSON.stringify(tmpTxt.split('\n')[0] + tmpTxt.split('\n')[1])
+          'Trying to recover until token ' +
+          recoverableToken.recover +
+          ' from ' +
+          JSON.stringify(tmpTxt.split('\n')[0] + tmpTxt.split('\n')[1])
         );
+      }
 
-      let tmp: IToken = {
+      const tmp: IToken = {
         type: 'SyntaxError',
         text: '',
         children: [],
@@ -546,7 +551,7 @@ export class Parser {
         fullText: '',
         parent: null,
         start: 0,
-        rest: ''
+        rest: '',
       };
 
       let got: IToken;
@@ -565,7 +570,9 @@ export class Parser {
       } while (!got && tmpTxt.length > 0);
 
       if (tmp.text.length > 0 && got) {
-        printable && console.log(new Array(recursion + 1).join('│  ') + 'Recovered text: ' + JSON.stringify(tmp.text));
+        if (printable) {
+          console.log(new Array(recursion + 1).join('│  ') + 'Recovered text: ' + JSON.stringify(tmp.text));
+        }
         return tmp;
       }
     }

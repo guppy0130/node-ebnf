@@ -1,11 +1,8 @@
-declare var describe, it, require;
+import { Grammars, Parser } from '../src';
+import { testParseToken, printBNF } from './TestHelpers';
+import { describe } from 'bun:test';
 
-import { Grammars, Parser, IToken } from '../dist';
-import { testParseToken, describeTree, printBNF } from './TestHelpers';
-
-let inspect = require('util').inspect;
-
-let grammar = `
+const grammar = `
 Grammar ::= RULE_S* (Production RULE_S*)*  EOF
 Production ::= NCName RULE_S* "::=" RULE_WHITESPACE* Choice RULE_WHITESPACE* RULE_EOL+ RULE_S*
 NCName ::= [a-zA-Z][a-zA-Z_0-9]*
@@ -33,7 +30,7 @@ Url ::= [^#x5D:\/?#] "://" [^#x5D#]+ ("#" NCName)?
 describe('Parse W3CEBNF', () => {
   let parser: Parser;
 
-  it('create parser', () => {
+  describe('create parser', () => {
     parser = new Parser(Grammars.W3C.RULES, {});
     testParseToken(parser, grammar);
     console.log('W3C PARSER', Grammars.W3C.emit(parser));
@@ -42,8 +39,8 @@ describe('Parse W3CEBNF', () => {
 });
 
 describe('Grammars.W3C parses itself', function() {
-  let RULES = Grammars.W3C.getRules(grammar);
-  let parser = new Parser(RULES, {});
+  const RULES = Grammars.W3C.getRules(grammar);
+  const parser = new Parser(RULES, {});
 
   testParseToken(parser, grammar);
 });

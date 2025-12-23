@@ -1,12 +1,8 @@
-declare var describe, it, require;
+import { Grammars } from '../src';
+import { printBNF, testParseTokenFailsafe } from './TestHelpers';
+import { describe, it, expect } from 'bun:test';
 
-import { Grammars, Parser, IToken } from '../dist';
-import { testParseTokenFailsafe, describeTree, printBNF, testParseToken } from './TestHelpers';
-
-let inspect = require('util').inspect;
-let expect = require('expect');
-
-let grammar = `
+const grammar = `
 /* https://www.ietf.org/rfc/rfc4627.txt */
 value                ::= false | null | true | object | number | string | array
 BEGIN_ARRAY          ::= WS* #x5B WS*  /* [ left square bracket */
@@ -41,7 +37,7 @@ HEXDIG                ::= [a-fA-F0-9]
 
 describe('JSON 2', () => {
   describe('Parse JSON', () => {
-    let parser: Parser;
+    // let parser: Parser;
 
     it('create parser', () => {
       printBNF(Grammars.Custom.defaultParser);
@@ -50,7 +46,7 @@ describe('JSON 2', () => {
   });
 
   describe('Grammars.Custom parses JSON grammar', function() {
-    let parser = new Grammars.Custom.Parser(grammar, {});
+    const parser = new Grammars.Custom.Parser(grammar, {});
 
     // printBNF(parser);
 

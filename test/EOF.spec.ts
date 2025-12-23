@@ -1,13 +1,9 @@
-declare var describe, it, require;
-
-import { Grammars, Parser, IToken } from '../dist';
-import { testParseTokenFailsafe, describeTree, printBNF, testParseToken } from './TestHelpers';
-
-let inspect = require('util').inspect;
-let expect = require('expect');
+import { Grammars } from '../src';
+import { testParseTokenFailsafe } from './TestHelpers';
+import { describe, expect } from 'bun:test';
 
 describe('EOF', function() {
-  let parser = new Grammars.Custom.Parser(
+  const parser = new Grammars.Custom.Parser(
     `
 Rule ::= Item* EOF
 Item ::= Space? Rules {recoverUntil=Space, fragment=true}
@@ -27,7 +23,7 @@ Space ::= " "+ | EOF
 });
 
 describe('EOF1', function() {
-  let parser = new Grammars.Custom.Parser(
+  const parser = new Grammars.Custom.Parser(
     `
 Rule ::= Rules EOF {pin=1}
 Rules ::= "true" | "false"

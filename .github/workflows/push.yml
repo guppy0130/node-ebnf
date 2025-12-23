@@ -1,32 +1,14 @@
 on:
-  push
+  "push"
 
-name: Test and release
+name: "Test"
 jobs:
-  install:
+  test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     steps:
-      - uses: actions/checkout@master
-      - name: Use Node.js 12.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12.x
-      - name: npm install
-        run: npm install
-      - name: build
-        run: npm run build
-      - name: test
-        run: npm run test
-      - name: coverage
-        run: npm run coverage
-      - name: lint
-        run: npm run lint
-      - name: Publish
-        uses: menduz/oddish-action@master
-        with:
-          provenance: true
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - uses: "actions/checkout@master"
+      - uses: "oven-sh/setup-bun@v2"
+      - run: "bun ci"
+      - run: "bun build src --outdir dist --root src"
+      - run: "bun test --coverage"
+      - run: "bun lint"

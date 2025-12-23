@@ -1,11 +1,8 @@
-declare var describe, it, require;
+import { Grammars, Parser } from '../src';
+import { testParseToken } from './TestHelpers';
+import { describe } from 'bun:test';
 
-import { Grammars, Parser, IToken } from '../dist';
-import { testParseToken, describeTree, printBNF } from './TestHelpers';
-
-let inspect = require('util').inspect;
-
-let grammar = `
+const grammar = `
 { ws=implicit }
 /* https://www.ietf.org/rfc/rfc4627.txt */
 value                ::= false | null | true | object | array | number | string
@@ -35,16 +32,16 @@ describe('WS', () => {
   describe('Parse JSON', () => {
     let parser: Parser;
 
-    it('create parser', () => {
+    describe('create parser', () => {
       parser = new Parser(Grammars.Custom.RULES, {});
       testParseToken(parser, grammar);
     });
   });
 
   describe('Grammars.Custom parses JSON grammar', function() {
-    let RULES = Grammars.Custom.getRules(grammar);
+    const RULES = Grammars.Custom.getRules(grammar);
     // console.log('JSON:\n' + inspect(RULES, false, 20, true));
-    let parser = new Parser(RULES, {});
+    const parser = new Parser(RULES, {});
 
     // printBNF(parser);
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 console.log(`/* AUTO GENERATED CODE USING ebnf NPM MODULE ${new Date().toISOString()}`);
 
@@ -8,12 +8,9 @@ function printUsage() {
        ^^^^^^^^^^^^ Source file`);
 }
 
-declare var process, require;
-
-const path = require('path');
-const fs = require('fs');
-const util = require('util');
-
+import { inspect } from 'util';
+import { readFileSync } from 'fs';
+import path from 'path';
 import { Grammars } from '.';
 
 let source: string = process.argv[2];
@@ -25,10 +22,10 @@ if (!source || source.length == 0) {
 
 source = path.resolve(process.cwd(), source);
 
-let sourceCode = fs.readFileSync(source).toString() + '\n';
+const sourceCode = readFileSync(source).toString() + '\n';
 
-let RULES = Grammars.Custom.getRules(sourceCode);
+const RULES = Grammars.Custom.getRules(sourceCode);
 
 console.log(`*/
 
-module.exports = ${util.inspect(RULES, { depth: 20, maxArrayLength: null })};`);
+export const RULES = ${inspect(RULES, { depth: 20, maxArrayLength: null })};`);

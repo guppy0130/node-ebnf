@@ -1,13 +1,9 @@
-declare var describe, it, require;
-
-import { Grammars, Parser, IToken } from '../dist';
-import { testParseToken, describeTree, printBNF } from './TestHelpers';
-
-let inspect = require('util').inspect;
-let expect = require('expect');
+import { Grammars } from '../src';
+import { testParseToken } from './TestHelpers';
+import { describe, expect } from 'bun:test';
 
 describe('Lookahead Negative', () => {
-  let parser = new Grammars.Custom.Parser(
+  const parser = new Grammars.Custom.Parser(
     `
     Document ::= ((Boolean | IdentifieR) " "*)+
     IdentifieR ::= [a-zA-Z]+
@@ -69,7 +65,7 @@ describe('Lookahead Negative', () => {
 });
 
 describe('Lookahead Positive', () => {
-  let parser = new Grammars.Custom.Parser(
+  const parser = new Grammars.Custom.Parser(
     `
     Document ::= ((Boolean | IdentifieR) " "*)+
     IdentifieR ::= [a-zA-Z]+
@@ -133,7 +129,7 @@ describe('Lookahead Positive', () => {
 });
 
 describe('Lookahead Positive', () => {
-  let parser = new Grammars.Custom.Parser(
+  const parser = new Grammars.Custom.Parser(
     `
     Document ::= ((FunctionName | Identifier | Parenthesis) " "*)+
     Identifier ::= [a-zA-Z_]+

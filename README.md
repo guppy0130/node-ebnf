@@ -1,6 +1,3 @@
-[![Coverage Status](https://coveralls.io/repos/github/menduz/node-ebnf/badge.svg?branch=master)](https://coveralls.io/github/menduz/node-ebnf?branch=master)
-[![Build Status](https://travis-ci.org/lys-lang/node-ebnf.svg?branch=master)](https://travis-ci.org/lys-lang/node-ebnf)
-
 # What is this?
 
 It parses a formal grammar and returns a parser instance. That parser returns ASTs based on your grammar. [**SEE IT IN ACTION HERE**](http://menduz.com/ebnf-highlighter/) [GitHub source](https://github.com/menduz/ebnf-highlighter)
